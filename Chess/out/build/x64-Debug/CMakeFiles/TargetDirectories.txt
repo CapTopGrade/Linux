@@ -1,0 +1,3 @@
+C:/Users/kl/Desktop/Linux/Chess/out/build/x64-Debug/CMakeFiles/Chess.dir
+C:/Users/kl/Desktop/Linux/Chess/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Users/kl/Desktop/Linux/Chess/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
