@@ -1,0 +1,10 @@
+[Unit]
+Description=Backup Daemon
+
+[Service]
+ExecStart=/home/user/daemon/main.cpp
+Restart=always
+
+[Install]
+WantedBy=default.target
+
