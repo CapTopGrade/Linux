@@ -80,7 +80,7 @@ private:
     // ‘ункци€ дл€ генерации возможных ходов дл€ пешек
     vector<Move> generatePawnMoves(int row, int col, bool isWhite) {
         vector<Move> possibleMoves;
-        int direction = isWhite ? -1 : 1; // Ќаправление движени€ пешки
+        int direction = isWhite ? -1 : 1;
 
         // ѕроверка возможности движени€ на одну клетку вперЄд
         int newRow = row + direction;
@@ -568,52 +568,103 @@ public:
         }
     }
 
-    void generateRandomPosition(int numFigures) {
+    void generateRandomPosition() {
         srand(time(0));
         board[WhiteKingRow][WhiteKingCol] = KING;
         board[BlackKingRow][BlackKingCol] = BLACK_KING;
 
-        for (int i = 0; i < numFigures - 2; ++i) {
-            char figure;
+
+        char figure;
+        int row, col;
+        int color = rand() % 2; // 0 - белые, 1 - черные
+
+        generateRandomPieces(numWhitePawns, PAWN);
+        generateRandomPieces(numWhiteRooks, ROOK);
+        generateRandomPieces(numWhiteBishops, BISHOP);
+        generateRandomPieces(numWhiteKnights, KNIGHT);
+
+
+        // √енераци€ случайных позиций дл€ черных фигур
+        generateRandomPieces(numBlackPawns, BLACK);
+        generateRandomPieces(numBlackRooks, BLACK_ROOK);
+        generateRandomPieces(numBlackBishops, BLACK_BISHOP);
+        generateRandomPieces(numBlackKnights, BLACK_KNIGHT);
+
+
+        if (color == 0) {
+            do {
+                row = rand() % BOARD_SIZE;
+                col = rand() % BOARD_SIZE;
+            } while (!isPositionValid(row, col, EMPTY_SQUARE)
+            || canPieceAttackKing(figure, row, col, BlackKingRow, BlackKingCol, 'k'));
+        }
+        else {
+            do {
+                row = rand() % BOARD_SIZE;
+                col = rand() % BOARD_SIZE;
+            } while (!isPositionValid(row, col, EMPTY_SQUARE)
+            || canPieceAttackKing(figure, row, col, WhiteKingRow, WhiteKingCol, 'K'));
+        }
+        board[row][col] = figure;
+
+    }
+
+    void generateRandomPositionForPiece(int color, char piece) {
+        int row, col;
+
+        do {
+            row = rand() % BOARD_SIZE;
+            col = rand() % BOARD_SIZE;
+        } while (!isPositionValid(row, col, EMPTY_SQUARE)
+                 || (color == 0 && canPieceAttackKing(piece, row, col, BlackKingRow, BlackKingCol, 'k'))
+                 || (color == 1 && canPieceAttackKing(piece, row, col, WhiteKingRow, WhiteKingCol, 'K')));
+
+
+    }
+
+    void generateRandomPositionForColor(int color, char pawn, char rook, char bishop, char knight, char king) {
+        int numPawns, numRooks, numBishops, numKnights, numKings;
+
+        // ¬ыбор количества фигур в зависимости от цвета
+        if (color == 0) {
+            numPawns = numWhitePawns;
+            numRooks = numWhiteRooks;
+            numBishops = numWhiteBishops;
+            numKnights = numWhiteKnights;
+        } else {
+            numPawns = numBlackPawns;
+            numRooks = numBlackRooks;
+            numBishops = numBlackBishops;
+            numKnights = numBlackKnights;
+        }
+
+        // √енераци€ случайной позиции дл€ каждой фигуры
+        for (int i = 0; i < numPawns; ++i) {
+            generateRandomPositionForPiece(color, pawn);
+        }
+        for (int i = 0; i < numRooks; ++i) {
+            generateRandomPositionForPiece(color, rook);
+        }
+        for (int i = 0; i < numBishops; ++i) {
+            generateRandomPositionForPiece(color, bishop);
+        }
+        for (int i = 0; i < numKnights; ++i) {
+            generateRandomPositionForPiece(color, knight);
+        }
+        for (int i = 0; i < numKings; ++i) {
+            generateRandomPositionForPiece(color, king);
+        }
+    }
+
+    void generateRandomPieces(int numPieces, char piece) {
+        for (int i = 0; i < numPieces; ++i) {
             int row, col;
-            int color = rand() % 2; // 0 - белые, 1 - черные
+            do {
+                row = rand() % BOARD_SIZE;
+                col = rand() % BOARD_SIZE;
+            } while (!isPositionValid(row, col, EMPTY_SQUARE));
 
-            switch (color) {
-            case 0:
-            {
-                switch (rand() % 4) {
-                case 0: figure = PAWN; break;
-                case 1: figure = ROOK; break;
-                case 2: figure = BISHOP; break;
-                case 3: figure = KNIGHT; break;
-                }
-            } break;
-            case 1:
-            {
-                switch (rand() % 4) {
-                case 0: figure = BLACK; break;
-                case 1: figure = BLACK_ROOK; break;
-                case 2: figure = BLACK_BISHOP; break;
-                case 3: figure = BLACK_KNIGHT; break;
-                }
-            }break;
-            }
-
-            if (color == 0) {
-                do {
-                    row = rand() % BOARD_SIZE;
-                    col = rand() % BOARD_SIZE;
-                } while (!isPositionValid(row, col, EMPTY_SQUARE)
-                    || canPieceAttackKing(figure, row, col, BlackKingRow, BlackKingCol, 'k'));
-            }
-            else {
-                do {
-                    row = rand() % BOARD_SIZE;
-                    col = rand() % BOARD_SIZE;
-                } while (!isPositionValid(row, col, EMPTY_SQUARE)
-                    || canPieceAttackKing(figure, row, col, WhiteKingRow, WhiteKingCol, 'K'));
-            }
-            board[row][col] = figure;
+            board[row][col] = piece;
         }
     }
 
@@ -670,6 +721,10 @@ public:
 
             if (bestMove.check != '\0') {
                 cout << bestMove.check << " ";
+                if (bestMove.check == '+') {
+                    cout << " " << endl;
+                    break;
+                }
             }
             else {
                 cout << " ";
@@ -677,6 +732,9 @@ public:
 
             bestMove = findBestMoves()[0];
             cout << endl;
+
+
+
         }
 
         cout << "\n";
@@ -717,6 +775,8 @@ public:
     }
 
 
+
+
     string convertToChessNotation(int row, int col) {
         char file = col + 'a';
         char rank = '8' - row;
@@ -727,23 +787,57 @@ public:
 
         return chessNotation;
     }
+
+    int numBlackKings;
+    int numBlackKnights;
+    int numBlackBishops;
+    int numBlackRooks;
+    int numBlackPawns;
+    int numWhiteKings;
+    int numWhiteKnights;
+    int numWhiteBishops;
+    int numWhiteRooks;
+    int numWhitePawns;
 };
 
+const char ChessBoard::EMPTY_SQUARE;
 
 
 int main() {
-    int NumberOfFigures;
-    cout << "Write number of figures: ";
-    cin >> NumberOfFigures;
+    ChessBoard chessBoard;
 
-    for (int i = 0; i < 1; i++) {
-        ChessBoard chessBoard;
-        chessBoard.generateRandomPosition(NumberOfFigures);
-        cout << "Initial Chess Board:" << endl;
-        chessBoard.printBoard();
 
-        chessBoard.findAndMakesMoves(3);
-    }
+    // «апрос у пользовател€ количества каждой фигуры дл€ белых
+    cout << "Enter the number of each piece for whites:" << endl;
+    cout << "Pawns: ";
+    cin >> chessBoard.numWhitePawns;
+    cout << "Rooks: ";
+    cin >> chessBoard.numWhiteRooks;
+    cout << "Bishops: ";
+    cin >> chessBoard.numWhiteBishops;
+    cout << "Knights: ";
+    cin >> chessBoard.numWhiteKnights;
+
+
+// «апрос у пользовател€ количества каждой фигуры дл€ черных
+    cout << "Enter the number of each piece for blacks:" << endl;
+    cout << "Pawns: ";
+    cin >> chessBoard.numBlackPawns;
+    cout << "Rooks: ";
+    cin >> chessBoard.numBlackRooks;
+    cout << "Bishops: ";
+    cin >> chessBoard.numBlackBishops;
+    cout << "Knights: ";
+    cin >> chessBoard.numBlackKnights;
+
+
+
+    chessBoard.generateRandomPosition();
+    cout << "Initial Chess Board:" << endl;
+    chessBoard.printBoard();
+
+    chessBoard.findAndMakesMoves(3);
+
 
     return 0;
 }
